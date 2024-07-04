@@ -1,0 +1,81 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+#library(openxlsx)
+```
+
+
+```{r}
+# using colMeans()
+#mean_val <- colMeans(dfPVswc,na.rm = TRUE)
+ 
+# replacing NA with mean value of each column
+#for(i in colnames(dfPVswc))
+  #dfPVswc[,i][is.na(dfPVswc[,i])] <- mean_val[i]
+#dfPVswc
+```
+
+```{r}
+# dfPVswc$age
+SWCControl <- data.frame(dfPVswc$bvGender, dfPVswc$educ, dfPVswc$occupation, dfPVswc$income, dfPVswc$ecoConcernFreq, dfPVswc$bvHousemate, dfPVswc$bvChildren, dfPVswc$bvOwnApartment, dfPVswc$bvSWChome, dfPVswc$easyOrganizeSWChome, dfPVswc$bvSpace, dfPVswc$bvSWCneighbors, dfPVswc$containersYard, dfPVswc$bvMapSPB, dfPVswc$bvParticipEcoEvents)
+```
+
+```{r}
+# calculate the distance matrix for objects
+dst <- dist(SWCControl, method="manhattan")
+
+# run AHC
+SWC.hclust <- hclust(dst, method="ward.D")
+```
+
+```{r dendro}
+# plot the dendrogram
+plot(SWC.hclust)
+plot(SWC.hclust, hang=-1)
+
+# how many clusters do you see in the dendrogram?
+rect.hclust(SWC.hclust, k=5, border="red") # consider different No of clusters
+
+# highlight a specific cluster
+#plot(Eserv.hclust, hang=-1)
+#rect.hclust(Eserv.hclust, which=2, k=3, border="blue") # consider different No of clusters
+```
+```{r}
+
+SWCControl1 <- data.frame(dfPVswc$bvGender, dfPVswc$educ, dfPVswc$age, dfPVswc$occupation, dfPVswc$income, dfPVswc$ecoConcernFreq, dfPVswc$bvHousemate, dfPVswc$bvChildren, dfPVswc$bvOwnApartment, dfPVswc$bvSWChome, dfPVswc$easyOrganizeSWChome, dfPVswc$bvSpace, dfPVswc$bvSWCneighbors, dfPVswc$containersYard, dfPVswc$bvMapSPB, dfPVswc$bvParticipEcoEvents)
+```
+
+```{r saveclusters}
+# save the cluster numbers either to a separate variable or to the dataframe
+SWC.clusters <- cutree(SWC.hclust, k=5)
+
+# how many observations is there in each cluster?
+table(SWC.clusters)
+
+```
+
+```{r}
+# describe cluster 1
+apply(SWCControl1[SWC.clusters==1,], 2, mean)
+`````````
+```{r}
+# describe cluster 2
+apply(SWCControl1[SWC.clusters==2,], 2, mean)
+`````````
+
+```{r}
+# describe cluster 3
+apply(SWCControl1[SWC.clusters==3,], 2, mean)
+`````````
+
+```{r}
+# describe cluster 4
+apply(SWCControl1[SWC.clusters==4,], 2, mean)
+`````````
+```{r}
+# describe cluster 5
+apply(SWCControl1[SWC.clusters==5,], 2, mean)
+`````````
