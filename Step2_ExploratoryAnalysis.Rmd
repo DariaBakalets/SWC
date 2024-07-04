@@ -1,0 +1,128 @@
+---
+title: "Step2_ExploratoryAnalysis"
+output: html_notebook
+---
+
+```{r}
+library(robustX)
+```
+
+```{r}
+dfPVswc <- read.csv("dataPVswc.csv")
+```
+
+# 1. PCA
+# 1.1 PCA blocks in the Model
+
+```{r}
+pca.EcoValue <- prcomp(dfPVswc[ , c("motivNegConseqMWC", "motivNextGen", "ecoConcernFreq", "ecoContributionNomatter")],
+                  scale=T, center=T)
+summary(pca.EcoValue)
+biplot(pca.EcoValue, xlim=c(-0.5, 0.5), xlabs=c(rep(" ", nrow(dfPVswc))))
+grid()
+```
+```{r}
+pca.CoProd <- prcomp(dfPVswc[ , c("motivSWCfriends", "sharedResponsibility", "socialEventsFreq", "coprodPubServ")],
+                  scale=T, center=T)
+summary(pca.CoProd)
+biplot(pca.CoProd, xlim=c(-0.5, 0.5), xlabs=c(rep(" ", nrow(dfPVswc))))
+grid()
+```
+```{r}
+pca.PSquality <- prcomp(dfPVswc[ , c("satisfWasteRemovalYard", "infofreqMunicAuth", "municAuthSWCinfo", "municAuthSWCefforts")],
+                  scale=T, center=T)
+summary(pca.PSquality)
+biplot(pca.PSquality, xlim=c(-0.5, 0.5), xlabs=c(rep(" ", nrow(dfPVswc))))
+grid()
+```
+```{r}
+pca.Outcomes <- prcomp(dfPVswc[ , c("ecoEffects", "techEffects", "fineconEffects", "munictrustEffects")],
+                  scale=T, center=T)
+summary(pca.Outcomes)
+biplot(pca.Outcomes, xlim=c(-0.5, 0.5), xlabs=c(rep(" ", nrow(dfPVswc))))
+grid()
+```
+```{r}
+pca.Trust <- prcomp(dfPVswc[ , c("trustFedAuth", "trustRegAuth", "trustMunicAuth", "municAuthActions", "municAuthAccessibility")],
+                  scale=T, center=T)
+summary(pca.Trust)
+biplot(pca.Trust, xlim=c(-0.5, 0.5), xlabs=c(rep(" ", nrow(dfPVswc))))
+grid()
+```
+```{r}
+pca.PV <- prcomp(dfPVswc[ , c("readytolearn", "childrenEarlyTeaching", "SWCifConditions")],
+                  scale=T, center=T)
+summary(pca.PV)
+biplot(pca.PV, xlim=c(-0.5, 0.5), xlabs=c(rep(" ", nrow(dfPVswc))))
+grid()
+```
+# 1.2 PCA other
+```{r}
+pca.SWC <- prcomp(dfPVswc[ , c("bvSWChome", "bvOwnApartment", "bvSpace", "age", "income", "bvParticipEcoEvents", "bvGender", "educ", "bvChildren", "bvHousemate", "bvSWCneighbors", "containersYard", "bvMapSPB")],
+                  scale=T, center=T)
+table(dfPVswc$bvSWChome, dfPVswc$bvOwnApartment)
+summary(pca.SWC)
+biplot(pca.SWC, xlim=c(-0.5, 0.5), xlabs=c(rep(" ", nrow(dfPVswc))))
+grid()
+```
+
+```{r}
+pca.motivSWC <- prcomp(dfPVswc[ , c("bvSWChome", "motivNegConseqMWC", "motivSatisfDoingRight", "motivNextGen", "motivSWCfriends", "motivContainersYard", "motivBrightColors", "motivLowTariffsSWC", "motivHighTariffsMWC", "motivSWCinfoAvailability" )],
+                  scale=T, center=T)
+
+summary(pca.motivSWC)
+biplot(pca.motivSWC, xlim=c(-0.5, 0.5), xlabs=c(rep(" ", nrow(dfPVswc))))
+grid()
+```
+
+```{r}
+pca.demotivSWC <- prcomp(dfPVswc[ , c("bvSWChome", "demotivTime", "demotivNoSpace", "demotivRulesUnawareness", "demotivRemoteContainers", "demotivFullContainers")],
+                  scale=T, center=T)
+
+summary(pca.demotivSWC)
+biplot(pca.demotivSWC, xlim=c(-0.5, 0.5), xlabs=c(rep(" ", nrow(dfPVswc))))
+grid()
+```
+
+# 2. MV outliers detection
+```{r}
+# the BACON procedure
+mv.bacon <- mvBACON(dfPVswc)
+str(mv.bacon)
+table(mv.bacon$subset)
+```
+
+# 3. Cluster analysis
+
+#идея: те, кто родеет за экологию, разделяет мусор.../те, кому все равно - посмотреть разницу PV
+
+#Variables: bvSWChome, bvParticipEcoEvents, bvMapSPB, bvSWCneighbors, readytolearn, SWCifConditions, ...
+```{r}
+# the distance matrix for objects
+forclust <- as.data.frame(dfPVswc [ , c("bvSWChome", "bvParticipEcoEvents", "bvMapSPB", "bvSWCneighbors", "readytolearn", "SWCifConditions")])
+
+dst <- dist(forclust, method="manhattan")
+
+# AHC
+swc.hclust <- hclust(dst, method="ward.D")
+```
+
+```{r} 
+#  the dendrogram
+plot(swc.hclust)
+plot(swc.hclust, hang=-1)
+
+swc.clusters <- cutree(swc.hclust, k=2)
+
+table(swc.clusters)
+
+apply(forclust[swc.clusters==1,], 2, sum)
+summary(forclust[swc.clusters==1,])
+
+apply(forclust[swc.clusters==2,], 2, sum)
+summary(forclust[swc.clusters==2,])
+```
+
+
+
+
