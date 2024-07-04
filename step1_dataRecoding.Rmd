@@ -1,0 +1,253 @@
+---
+title: "PV in SGC"
+subtitle: "Part 1. Data re-coding"
+output: html_document
+---
+
+# Load libraries
+
+```{r loadlib, message=F, warning=F}
+library(openxlsx)
+library(car) # recode
+library(plyr) # revalue
+```
+
+
+# 1. Import the data
+
+```{r}
+#dfPVswc <- read.xlsx("rawDataSurveyAnswers.xlsx", sheet="data")
+
+dfPVswc$time <- NULL
+dfPVswc$bvLiveSPb <- NULL
+```
+
+
+# 2. Recode the data
+
+## 2.1. Recoding of multi-level variables
+```{r}
+# EcoContribution
+dfPVswc$ecoContributionMatter <- recode(dfPVswc$ecoContributionNomatter,
+                          "'1'='5'; 
+                          '2'='4'; 
+                          '3'='3'; 
+                          '4'='2'; 
+                          '5'='1'", 
+                as.numeric = TRUE)
+
+```
+
+```{r}
+# education
+dfPVswc$educ <- recode(dfPVswc$educ,
+                          "'Неполное среднее (9 классов)'='1'; 
+                          'Полное среднее (11 классов)'='2'; 
+                          'Среднее профессиональное'='3'; 
+                          'Незаконченное высшее (студент)'='4'; 
+                          'Высшее образование'='5'", 
+                as.numeric = TRUE)
+
+
+# occupation
+dfPVswc$occupation <- recode(dfPVswc$occupation,
+                          "'Учусь в школе/колледже/вузе'='1'; 
+                          'Безработный и активно ищу работу'='2'; 
+                          'Работаю временно/постоянно/самозанятый'='3'; 
+                          'Безработный и не ищу работу (занимаюсь домашним хозяйством/нахожусь в декретном отпуске/отпуске по уходу за ребенком)'='4'; 
+                          'Нахожусь на пенсии'='5'", 
+                as.numeric = TRUE)
+
+
+# apartment: 0 - not own; 1 - own
+dfPVswc$bvOwnApartment <- recode(dfPVswc$apartment,
+                          "'Служебное жилье '='0';
+                          'На'='0';
+                          'Живу в общежитии'='0';
+                          'В муниципального квартире'='0';
+                          'в квартире по социальному найму'='0';
+                          'Снимаю комнату'='0';
+                          'Снимаю квартиру'='0';
+                          'У родственников '='0';
+                          'Живу у родственников'='0';
+                          'Живу с сестрой в ее квартире'='0';
+                          'Живу в квартире сестры'='0';
+                          'живу в квартире друга'='0';
+                          'у друзей'='0';
+                          'Живу с другом в его квартире'='0';
+                          'Живу у молодого человека'='0';
+                          'Живу в квартире родителей'='0';
+                          'Живу с родителями в квартире, которой владеют они'='0';
+                          'Живу в квартире мамы'='0';
+                          'На шее у мамы'='0';
+                          'В квартире матери'='0';
+                          'Живу в собственной комнате в коммунальной квартире'='0';
+                          'Живу в собственной квартире'='1';
+                          'снимаю дом'='1';
+                          'Живу в собственном доме'='1'",                                               
+                as.numeric = TRUE)
+
+
+dfPVswc$apartment <- NULL
+
+# easyorganizeSWChome
+dfPVswc$easyOrganizeSWChome <- recode(dfPVswc$easyOrganizeSWChome,
+                          "'Очень сложно'='1'; 
+                          'Достаточно сложно'='2'; 
+                          'Достаточно легко'='3'; 
+                          'Очень легко'='4'", 
+                as.numeric = TRUE)
+```
+
+```{r}
+# containersYard
+#dfPVswc$containersYard <- recode(dfPVswc$containersYard,
+                          "'-1'='1'; 
+                          '0'='2'; 
+                          '1'='3'",
+                #as.numeric = TRUE)
+```
+
+```{r}
+# bvHousemate
+dfPVswc$bvHousemate <- recode(dfPVswc$bvHousemate, 
+                              "'1'='0';
+                              '2'='1'", 
+                              as.numeric = TRUE)
+```
+
+# maxdistcontainers
+dfPVswc$maxdistContainers <- recode(dfPVswc$maxdistContainers,
+                          "'Не более 100 метров'='1';
+                          'Не более 200 метров'='2'; 
+                          'Не более 300 метров'='3';
+                          'Не более 400 метров'='4';
+                          'Более 400 метров'='5';
+                          'Более 400 метром'='5'",
+                as.numeric = TRUE)
+
+
+# satisfwasteremovalyard
+dfPVswc$satisfWasteRemovalYard <- recode(dfPVswc$satisfWasteRemovalYard,
+                          "'Совсем не удовлетворен'='1';
+                          'Скорее не удовлетворен'='2'; 
+                          'Трудно сказать'='3';
+                          'Скорее удовлетворен'='4';
+                          'Абсолютно удовлетворен'='5'",
+                as.numeric = TRUE)
+
+
+# infofreqmunicauth
+dfPVswc$infofreqMunicAuth <- recode(dfPVswc$infofreqMunicAuth,
+                          "'Никогда'='1';
+                          'Редко'='2';
+                          'Иногда'='3';
+                          'Часто'='4';
+                          'Очень часто'='5'",
+                as.numeric = TRUE)
+
+
+# ecoconcernfreq
+dfPVswc$ecoConcernFreq <- recode(dfPVswc$ecoConcernFreq,
+                          "'Никогда'='1';
+                          'Редко'='2';
+                          'Иногда'='3';
+                          'Часто'='4';
+                          'Очень часто'='5'",
+                as.numeric = TRUE)
+
+
+# SWCifconditions
+dfPVswc$SWCifConditions <- recode(dfPVswc$SWCifConditions,
+                          "'Точно нет'='1';
+                          'Скорее нет'='2';
+                          'Не уверен'='3';
+                          'Скорее да'='4';
+                          'Точно да'='5'",
+                as.numeric = TRUE)
+
+
+# socialeventsfreq
+dfPVswc$socialEventsFreq <- recode(dfPVswc$socialEventsFreq,
+                          "'Я никогда не принимаю участие в общественных мероприятиях'='1';
+                          'Я очень редко принимаю участие в общественных мероприятиях'='2';
+                          'Я периодически принимаю участие в общественных мероприятиях'='3';
+                          'Я считаю себя активным участником общественной жизни, активно принимаю участие в общественных мероприятиях'='4'",
+                as.numeric = TRUE)
+
+
+# coprodpubserv
+dfPVswc$coprodPubServ <- recode(dfPVswc$coprodPubServ,
+                          "'Абсолютно негативно'='1';
+                          'Скорее негативно'='2';
+                          'Нейтрально'='3';
+                          'Скорее позитивно'='4';
+                          'Абсолютно позитивно'='5'",
+                as.numeric = TRUE)
+
+
+# income
+
+## replace colon with dash
+dfPVswc$income <- revalue(dfPVswc$income, c("Очень высокий (мы можем позволить себе практически все: машину, квартиру, дачу и многое другое)"="Очень высокий (мы можем позволить себе практически все - машину, квартиру, дачу и многое другое)"))
+
+## recode
+
+dfPVswc$income <- recode(dfPVswc$income,
+                          "'Очень низкий (денег не хватает даже на приобретение продуктов питания)'='1';
+                          'Низкий (денег хватает только на приобретение продуктов питания)'='2';
+                          'Средний (денег хватает для приобретения продуктов питания и одежды, более крупные покупки приходится откладывать)'='3';
+                          'Высокий (покупка большинства товаров длительного пользования - телевизора, холодильника - не вызывает трудностей, однако купить квартиру, машину, дачу мы не можем)'='4'; 
+                          'Очень высокий (мы можем позволить себе практически все - машину, квартиру, дачу и многое другое)'='5'", 
+                as.numeric = TRUE)
+
+# colon in 'Очень высокий (мы можем позволить себе практически все: машину, квартиру, дачу и многое другое)' was replaced with dash symbol
+
+```
+
+
+## 2.2. Recoding of binary variables
+
+```{r}
+# bvGender
+dfPVswc$bvGender <- recode(dfPVswc$bvGender, "'Женский'='1'; else= '0'", as.numeric = TRUE)
+
+```
+
+```{r}
+# bvHousemate
+dfPVswc$bvHousemate <- recode(dfPVswc$bvHousemate, "'1'='0'; else= '1'", as.numeric = TRUE)
+```
+# bvChildren
+dfPVswc$bvChildren <- recode(dfPVswc$bvChildren, "'Да'='1'; else= '0'", as.numeric = TRUE)
+
+
+# bvswchome
+dfPVswc$bvSWChome <- recode(dfPVswc$bvSWChome, "'Да'='1'; else= '0'", as.numeric = TRUE)
+
+
+# bvswcneighbors
+dfPVswc$bvSWCneighbors <- recode(dfPVswc$bvSWCneighbors, "'Да'='1'; else= '0'", as.numeric = TRUE)
+
+
+# bvspace
+dfPVswc$bvSpace <- recode(dfPVswc$bvSpace, "'Да'='1'; else= '0'", as.numeric = TRUE)
+
+# bvmapspb
+dfPVswc$bvMapSPB <- recode(dfPVswc$bvMapSPB, "'Да'='1'; else= '0'", as.numeric = TRUE)
+
+# bvparticipecoevents
+dfPVswc$bvParticipEcoEvents <- recode(dfPVswc$bvParticipEcoEvents, "'Да'='1'; else= '0'", as.numeric = TRUE)
+```
+
+
+# 3. Store results
+
+```{r}
+write.csv(dfPVswc, file="dataPVswc.csv", quote = F, row.names = F)
+```
+
+
+
+
+
