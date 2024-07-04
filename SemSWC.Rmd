@@ -1,0 +1,102 @@
+---
+title: "Partial Least Squares"
+subtitle: ""
+author: "Bakalets Daria"
+---
+
+
+```{r message=F,warning=F}
+library(semPLS)
+library(DiagrammeR)
+```
+
+```{r}
+dfPVswc <- read.csv("dataPVswc.csv")
+```
+
+```{r}
+# load the data
+# dfRaw
+
+SWClist1<- read.xlsx("semSWCtables.xlsx", sheet = "list3")
+SWClist2 <- read.xlsx("semSWCtables.xlsx", sheet = "list4")
+
+SWCmm <- as.matrix(SWClist1)
+SWCsm <- as.matrix(SWClist2)
+
+
+```
+
+
+# 1. Model construction
+
+```{r}
+# describe the model
+mdlStrucSWC <- plsm(data=dfPVswc, strucmod=SWCsm, measuremod=SWCmm)
+```
+
+
+```{r}
+# estimate the model
+mdlSWC <- sempls(model=mdlStrucSWC, data=dfPVswc)
+```
+
+
+```{r}
+# get the R^2 coefficients
+rSquared(mdlSWC)
+```
+
+
+# 2. Diagram construction
+
+```{r}
+# create the diagram
+# (!) Note that graphviz (www.graphviz.org) must be available.
+
+pathDiagram(mdlSWC, file = "SWCdiag", 
+            full = TRUE, edge.labels = "both",
+            output.type = "graphics", digits = 2,
+            graphics.fmt = "pdf", rSquared=rSquared(mdlSWC))
+grViz("SWCdiag.dot")
+
+```
+
+
+
+# 3. Analysis of the coefficients
+
+
+```{r}
+# extracting the path coefficients
+print(pathCoeff(mdlSWC), abbreviate = TRUE, minlength = 3)
+```
+
+
+```{r}
+# extract outer weights
+plsWeights(mdlSWC) # parts of each LV
+```
+
+```{r}
+plsLoadings(mdlSWC) # lambda coefficients
+```
+
+
+```{r}
+#Bootstrapping
+abegin <- Sys.time()
+set.seed(123)
+ecsiBoot <- bootsempls(mdlSWC, nboot=671, start = "ones", verbose = FALSE)
+
+ecsiBoot
+
+summary(ecsiBoot, type = "bca", level = 0.95)
+
+aend <- Sys.time()
+```
+
+
+
+
+
